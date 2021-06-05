@@ -1,7 +1,6 @@
 <?php
 $dir = dirname(__DIR__);
 require($dir.'/vendor/autoload.php');
-require($dir.'/vendor/taufik-nurrohman/php-html-css-js-minify/php-html-css-js-minifier.php');
 
 $minifiers = [
 	'hexydec/cssdoc' => function (string $css) use ($dir) {
@@ -63,8 +62,32 @@ $urls = [
 	'https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.css',
 	'https://cdnjs.cloudflare.com/ajax/libs/uikit/3.6.20/css/uikit-core.css'
 ];
-
-$obj = new minifyCompare($minifiers, !isset($_GET['nocache']));
-if (($html = $obj->drawCompare($urls, 'CSS Minifiers')) !== null) {
-	echo $html;
-}
+$config = [
+	'title' => 'CSS Minifiers',
+	'cache' => !isset($_GET['nocache']),
+	'validator' => function (string $css, ?array &$output = null) {
+		$url = 'https://validator.w3.org/nu/?out=json&css=yes';
+		$context = stream_context_create([
+			'http' => [
+				'header' => [
+					'Content-type: text/css; charset=utf-8'
+				],
+				'user_agent' => 'hexydec/minify-compare',
+				'method' => 'POST',
+				'content' => $css
+			]
+		]);
+		if (($json = file_get_contents($url, false, $context)) !== false && ($output = json_decode($json, true)) !== null) {
+			$errors = 0;
+			foreach ($output['messages'] AS $item) {
+				if ($item['type'] === 'error') {
+					$errors++;
+				}
+			}
+			return $errors;
+		}
+		return false;
+	}
+];
+$obj = new \hexydec\minify\compare($minifiers, $config);
+exit($obj->drawPage($urls));

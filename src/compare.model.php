@@ -1,19 +1,27 @@
 <?php
+namespace hexydec\minify;
 
-class minifyCompare {
+class compareModel {
 
-	protected $minifiers = [];
-	protected $cache = true;
+	public $minifiers = [];
+	public $config = [
+		'title' => null,
+		'cache' => true,
+		'ratelimit' => 2000,
+		'validator' => null
+	];
+	public $action = null;
+	public $minifier = null;
+	public $url = null;
 
-	public function __construct(array $minifiers, bool $cache = true) {
+	public function __construct(array $minifiers, array $config) {
 		$this->minifiers = $minifiers;
-		$this->cache = $cache;
-		ini_set('memory_limit', '256M');
+		$this->config = array_merge($this->config, $config);
 	}
 
 	public function fetch($url) {
 		$cache = dirname(__DIR__).'/cache/'.preg_replace('/[^0-9a-z]++/i', '-', $url).'.cache';
-		if ($this->cache && file_exists($cache)) {
+		if ($this->config['cache'] && file_exists($cache)) {
 			$url = $cache;
 		}
 		$context = stream_context_create([
@@ -37,7 +45,7 @@ class minifyCompare {
 		return $html ? $html : false;
 	}
 
-	protected function scrapeLinks(string $url, string $selector) {
+	public function scrapeLinks(string $url, string $selector) {
 		$obj = new \hexydec\html\htmldoc();
 		if (($html = $this->fetch($url)) !== false && $obj->load($html)) {
 
@@ -65,6 +73,8 @@ class minifyCompare {
 				$stats[$url] = [
 					'input' => strlen($input),
 					'inputgzip' => strlen(gzencode($input)),
+					'errors' => $this->validate($input, $validator),
+					'validator' => $validator,
 					'minifiers' => [],
 					'best' => [],
 					'worst' => []
@@ -75,14 +85,17 @@ class minifyCompare {
 
 					// minify
 					$start = \microtime(true);
-					$output = $this->minify($item, $input, $url);
+					$output = $this->minify($item, $input, $url, $error);
 					$finish = \microtime(true);
 
 					// calculate stats
 					$stat = [
+						'error' => $error,
 						'output' => strlen($output),
 						'outputgzip' => $output ? strlen(gzencode($output)) : 0,
-						'time' => $finish - $start
+						'time' => $finish - $start,
+						'errors' => $this->validate($output, $validator),
+						'validator' => $validator
 					];
 					$stat['irregular'] = $stat['output'] < ($stats[$url]['input'] * 0.4);
 					$stat['diff'] = $stat['output'] - $stats[$url]['input'];
@@ -93,12 +106,69 @@ class minifyCompare {
 				}
 			}
 		}
+		return $stats ? $stats : false;
+	}
 
-		// calculate totals
+	public function minify(\Closure $minifier, string $input, string $url, ?string &$error = null) {
+		$error = null;
+		\set_time_limit(30);
+
+		// Setup the environment
+		$_SERVER['HTTP_HOST'] = parse_url($url, PHP_URL_HOST);
+		$_SERVER['REQUEST_URI'] = parse_url($url, PHP_URL_PATH);
+		$_SERVER['HTTPS'] = mb_strpos($url, 'https://') === 0 ? 'on' : '';
+
+		// minify
+		try {
+			return call_user_func($minifier, $input, $url);
+		} catch (Throwable $e) {
+			$error = $e->getMessage();
+			return false;
+		}
+	}
+
+	protected function validate(string $code, ?array &$output = null) {
+		if (!empty($this->config['validator'])) {
+
+			// pull from cache
+			$cache = $this->config['cache'] ? dirname(__DIR__).'/cache/'.md5($code).'.json' : null;
+			if (file_exists($cache) && ($json = file_get_contents($cache)) !== false && ($data = json_decode($json, true)) !== null) {
+				$output = $data['output'];
+				return $data['errors'];
+			} else {
+
+				// rate limit
+				static $last = 0;
+				$now = microtime(true);
+				if ($last + $this->config['ratelimit'] > $now) {
+					usleep(($this->config['ratelimit'] - ($now - $last)) * 1000);
+				}
+				$last = microtime(true);
+
+				// run the validator
+				if (($errors = $this->config['validator']($code, $output)) !== false) {
+
+					// save to cache
+					if ($cache) {
+						file_put_contents($cache, json_encode([
+							'errors' => $errors,
+							'output' => $output
+						]));
+					}
+					return $errors;
+				}
+			}
+		}
+		return null;
+	}
+
+	public function getTotals(array $stats) {
 		$totals = [
 			'input' => array_sum(array_column($stats, 'input')),
 			'inputgzip' => array_sum(array_column($stats, 'inputgzip')),
 			'minifiers' => [],
+			'errors' => 0,
+			'validator' => null,
 			'best' => [],
 			'worst' => []
 		];
@@ -109,7 +179,9 @@ class minifyCompare {
 				'diff' => 0,
 				'outputgzip' => 0,
 				'diffgzip' => 0,
-				'irregular' => false
+				'irregular' => false,
+				'errors' => 0,
+				'validator' => null
 			];
 
 			// calculate totals
@@ -128,9 +200,10 @@ class minifyCompare {
 			$total['ratiogzip'] = 100 - ((100 / $totals['inputgzip']) * $total['outputgzip']);
 			$totals['minifiers'][$item] = $total;
 		}
-		$stats['Total'] = $totals;
+		return $totals;
+	}
 
-		// work out best and worst
+	public function getBestAndWorst(array $stats) {
 		foreach ($stats AS $url => $stat) {
 			$best = [];
 			$worst = [];
@@ -161,68 +234,11 @@ class minifyCompare {
 		return $stats;
 	}
 
-	protected function minify(\Closure $minifier, string $input, string $url) {
-		\set_time_limit(30);
-
-		// Setup the environment
-		$_SERVER['HTTP_HOST'] = parse_url($url, PHP_URL_HOST);
-		$_SERVER['REQUEST_URI'] = parse_url($url, PHP_URL_PATH);
-		$_SERVER['HTTPS'] = mb_strpos($url, 'https://') === 0 ? 'on' : '';
-
-		// minify
-		return call_user_func($minifier, $input, $url);
-	}
-
-	public function drawCompareScrape(string $url, string $selector, ?string $title = null) : ?string {
-		if (($urls = $this->scrapeLinks($url, $selector)) !== false) {
-			return $this->drawCompare($urls, $title);
+	public function getMinifyStats(array $urls) {
+		if (($stats = $this->minifyUrls($urls)) !== false) {
+			$stats['Total'] = $this->getTotals($stats);
+			return $this->getBestAndWorst($stats);
 		}
-		return null;
-	}
-
-	public function drawCompare(array $urls, ?string $title = null) {
-		$keys = array_keys($this->minifiers);
-		if (($_GET['action'] ?? '') === 'code' && in_array(($_GET['minifier'] ?? ''), $keys) && in_array(($_GET['url'] ?? ''), $urls)) {
-			if (($input = $this->fetch($_GET['url'])) !== false) {
-				header('Content-type: text/plain');
-				exit($this->minify($this->minifiers[$_GET['minifier']], $input, $_GET['url']));
-			}
-		} else {
-			$stats = $this->minifyUrls($urls);
-
-			// render the table
-			$table = $this->compile([
-				'minifiers' => $keys,
-				'stats' => $stats
-			], __DIR__.'/templates/table.php');
-
-			// wrap in a template
-			return $this->compile([
-				'title' => $title,
-				'table' => $table
-			], __DIR__.'/templates/template.php');
-		}
-	}
-
-	/**
-	 * Compiles dynamically generated content into a PHP template
-	 *
-	 * @param array $content An array containing the values to be compiled
-	 * @param string $template The absolute/relative (Relative if $prefix) filepath to the template file
-	 * @return string The compiled HTML
-	 */
-	public static function compile(array $content, string $template) : string { // Compiles an Array with a PHP file
-		${'template-66f6181bcb4cff4cd38fbc804a036db6'} = $template; // use a weird name to make sure the variable doesn't get overwritten
-		foreach ($content AS ${'key-66f6181bcb4cff4cd38fbc804a036db6'} => ${'value-66f6181bcb4cff4cd38fbc804a036db6'}) {
-			$${'key-66f6181bcb4cff4cd38fbc804a036db6'} = ${'value-66f6181bcb4cff4cd38fbc804a036db6'}; // manual extract to allow for vars with dashes
-		}
-		if (is_array($content)) {
-			unset($content); // may have been overwritten
-		}
-		ob_start();
-		require(${'template-66f6181bcb4cff4cd38fbc804a036db6'});
-		$html = ob_get_contents();
-		ob_end_clean();
-		return $html;
+		return false;
 	}
 }

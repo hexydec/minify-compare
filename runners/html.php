@@ -1,7 +1,6 @@
 <?php
 $dir = dirname(__DIR__);
 require($dir.'/vendor/autoload.php');
-require($dir.'/vendor/taufik-nurrohman/php-html-css-js-minify/php-html-css-js-minifier.php');
 
 $minifiers = [
 	'hexydec/htmldoc' => function (string $html, string $url) use ($dir) {
@@ -45,9 +44,35 @@ $minifiers = [
 	// }
 ];
 
-$obj = new minifyCompare($minifiers, !isset($_GET['nocache']));
+$config = [
+	'title' => 'HTML Minifiers',
+	'cache' => !isset($_GET['nocache']),
+	'validator' => function (string $html, ?array &$output = null) {
+		$url = 'https://html5.validator.nu/?out=json';
+		$context = stream_context_create([
+			'http' => [
+				'header' => [
+					'Content-type: text/html; charset=utf-8'
+				],
+				'user_agent' => 'hexydec/minify-compare',
+				'method' => 'POST',
+				'content' => $html
+			]
+		]);
+		if (($json = file_get_contents($url, false, $context)) !== false && ($output = json_decode($json, true)) !== null) {
+			$errors = 0;
+			foreach ($output['messages'] AS $item) {
+				if ($item['type'] === 'error') {
+					$errors++;
+				}
+			}
+			return $errors;
+		}
+		return false;
+	}
+];
+
+$obj = new \hexydec\minify\compare($minifiers, $config);
 $url = 'https://kinsta.com/blog/wordpress-site-examples/';
 $selector = 'h3 > a';
-if (($html = $obj->drawCompareScrape($url, $selector, 'HTML Minifiers')) !== null) {
-	echo $html;
-}
+exit($obj->drawPage($url, $selector));

@@ -1,7 +1,6 @@
 <?php
 $dir = dirname(__DIR__);
 require($dir.'/vendor/autoload.php');
-require($dir.'/vendor/taufik-nurrohman/php-html-css-js-minify/php-html-css-js-minifier.php');
 
 $minifiers = [
 	'hexydec/jslite' => function (string $js) use ($dir) {
@@ -44,8 +43,9 @@ $urls = [
 	'https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js',
 	// 'https://cdnjs.cloudflare.com/ajax/libs/antd/4.16.0/antd.js'
 ];
-
-$obj = new minifyCompare($minifiers, !isset($_GET['nocache']));
-if (($html = $obj->drawCompare($urls, 'JS Minifiers')) !== null) {
-	echo $html;
-}
+$config = [
+	'title' => 'Javascript Minifiers',
+	'cache' => !isset($_GET['nocache']),
+];
+$obj = new \hexydec\minify\compare($minifiers, $config);
+exit($obj->drawPage($urls));
