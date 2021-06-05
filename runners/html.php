@@ -59,19 +59,18 @@ $config = [
 				'content' => $html
 			]
 		]);
-		if (($json = file_get_contents($url, false, $context)) !== false && ($output = json_decode($json, true)) !== null) {
-			$errors = 0;
-			foreach ($output['messages'] AS $item) {
+		if (($json = file_get_contents($url, false, $context)) !== false && ($data = json_decode($json, true)) !== null) {
+			$output = [];
+			foreach ($data['messages'] AS $item) {
 				if ($item['type'] === 'error') {
-					$errors++;
+					$output[] = $item['message'];
 				}
 			}
-			return $errors;
+			return count($output);
 		}
 		return false;
 	}
 ];
-
 $obj = new \hexydec\minify\compare($minifiers, $config);
 $url = 'https://kinsta.com/blog/wordpress-site-examples/';
 $selector = 'h3 > a';

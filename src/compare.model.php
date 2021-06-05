@@ -127,7 +127,7 @@ class compareModel {
 		}
 	}
 
-	protected function validate(string $code, ?array &$output = null) {
+	protected function validate(string $code, ?array &$output = null) : ?int {
 		if (!empty($this->config['validator'])) {
 
 			// pull from cache
