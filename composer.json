@@ -1,6 +1,6 @@
 {
     "name": "hexydec/html-minify-test",
-    "description": "A script to compare the performance of HTML minifiers",
+    "description": "A script to compare the performance of PHP code minifiers",
     "type": "library",
     "license": "MIT",
     "authors": [

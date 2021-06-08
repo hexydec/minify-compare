@@ -54,7 +54,7 @@
 										The input contained <?= $data['errors'] ? $data['errors'].' error'.($data['errors'] === 1 ? '' : 's') : 'no errors'; ?>
 										<a href="<?= htmlspecialchars($url); ?>" target="_blank" title="View source code" class="minify__popup-code icon-code"></a>
 									</h3>
-									<ol class="minify__popup-output"><li><?= implode('</li><li>', array_map('htmlspecialchars', $data['validator'])); ?></li></ol>
+									<ol class="minify__popup-output"><li><?= implode('</li><li>', array_map('htmlspecialchars', $data['validator'] ?? [])); ?></li></ol>
 								</div>
 							</div>
 						<?php } else { ?>
@@ -98,7 +98,7 @@
 											The input contained <?= $data['errors'] ? $data['errors'].' error'.($data['errors'] === 1 ? '' : 's') : 'no errors'; ?>, and the output contained <?= $item['errors'] ? $item['errors'].' error'.($item['errors'] === 1 ? '' : 's') : 'no errors'; ?>
 											<a href="?action=code&amp;minifier=<?= htmlspecialchars($key); ?>&amp;url=<?= urlencode($url); ?>" target="_blank" title="View source code" class="minify__popup-code icon-code"></a>
 										</h3>
-										<ol class="minify__popup-output"><li><?= implode('</li><li>', array_map('htmlspecialchars', $item['validator'])); ?></li></ol>
+										<ol class="minify__popup-output"><li><?= implode('</li><li>', array_map('htmlspecialchars', $item['validator'] ?? [])); ?></li></ol>
 									</div>
 								</div>
 							<?php }
