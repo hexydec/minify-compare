@@ -9,15 +9,15 @@ class compareView {
 		$this->model = $model;
 	}
 
-	public function drawCompareScrape(string $url, string $selector, ?string $title = null) : ?string {
-		if (($urls = $this->model->scrapeLinks($url, $selector)) !== false) {
-			return $this->drawCompare($urls, $title);
+	public function drawCompareScrape(string $url, string $selector, bool $cache = true) : ?string {
+		if (($urls = $this->model->scrapeLinks($url, $selector, $cache)) !== false) {
+			return $this->drawCompare($urls);
 		}
 		return null;
 	}
 
-	public function drawCompare(array $urls) {
-		if (($stats = $this->model->getMinifyStats($urls)) !== false) {
+	public function drawCompare(array $urls, bool $cache = true) {
+		if (($stats = $this->model->getMinifyStats($urls, $cache)) !== false) {
 
 			// render the table
 			$table = $this->compile([

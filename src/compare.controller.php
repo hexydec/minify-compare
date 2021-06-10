@@ -21,7 +21,7 @@ class compare {
 		}
 	}
 
-	public function drawPage($urls, string $selector = null) {
+	public function drawPage($urls, string $selector = null, bool $cache = true) {
 		if ($this->model->action === 'code') {
 			if (($code = $this->view->drawMinifierOutput($this->model->minifier, $this->model->url)) === null) {
 				trigger_error('The minifier didn\'t output any code', E_USER_WARNING);
@@ -33,10 +33,10 @@ class compare {
 			if (!$selector) {
 				trigger_error('Please specify a selector to scrape the URLs with', E_USER_WARNING);
 			} else {
-				return $this->view->drawCompareScrape($urls, $selector);
+				return $this->view->drawCompareScrape($urls, $selector, $cache);
 			}
 		} else {
-			return $this->view->drawCompare($urls);
+			return $this->view->drawCompare($urls, $cache);
 		}
 	}
 }

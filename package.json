@@ -1,0 +1,30 @@
+{
+  "name": "minify-compare",
+  "version": "0.2.0",
+  "description": "A script to compare the performance of PHP code minifiers",
+  "main": "runners/html.php",
+  "dependencies": {
+    "esprima": "^4.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hexydec/minify-compare.git"
+  },
+  "keywords": [
+    "php",
+    "minify",
+    "html",
+    "css",
+    "javascript"
+  ],
+  "author": "Will Earp",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hexydec/minify-compare/issues"
+  },
+  "homepage": "https://github.com/hexydec/minify-compare#readme"
+}

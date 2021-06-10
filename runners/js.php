@@ -2,6 +2,8 @@
 $dir = dirname(__DIR__);
 require($dir.'/vendor/autoload.php');
 
+ini_set('memory_limit', '256M');
+
 $minifiers = [
 	'hexydec/jslite' => function (string $js) use ($dir) {
 		$obj = new \hexydec\jslite\jslite();
@@ -31,7 +33,8 @@ $minifiers = [
 ];
 
 $urls = [
-	'https://github.com/hexydec/dabby/releases/download/0.9.12/dabby.js',
+	// 'https://github.com/hexydec/dabby/releases/download/0.9.12/dabby.js',
+	'http://127.0.0.1/dabby/dist/dabby.js',
 	'https://code.jquery.com/jquery-3.6.0.js',
 	'https://cdnjs.cloudflare.com/ajax/libs/vue/3.0.11/vue.runtime.esm-browser.js',
 	'https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.js',
@@ -45,7 +48,54 @@ $urls = [
 ];
 $config = [
 	'title' => 'Javascript Minifiers',
-	'cache' => !isset($_GET['nocache']),
+	'validator' => function (string $js, ?array &$output = null) {
+		$cmd = 'node "'.__DIR__.'/esprima.js"';
+
+		// https://bugs.php.net/bug.php?id=49139
+		if (PHP_OS == 'WINNT' && PHP_MAJOR_VERSION  < 8) {
+			$cmd = '"'.$cmd.'"';
+		}
+
+		// setup pipes
+		$descriptors = [
+			0 => ['pipe', 'rb'],  // stdin
+			1 => ['pipe', 'wb'],  // stdout
+			2 => ['pipe', 'w'],  // stderr
+		];
+
+		// run command
+		if (($proc = proc_open($cmd, $descriptors, $pipes)) !== false && is_resource($proc)) {
+
+			// send input to stdin
+			fwrite($pipes[0], $js);
+			fclose($pipes[0]);
+
+			// retrieve outputted PDF
+			$result = stream_get_contents($pipes[1]);
+			fclose($pipes[1]);
+
+			// retrieve program output
+			$error = stream_get_contents($pipes[2]);
+			fclose($pipes[2]);
+
+			// get the status
+			$status = proc_get_status($proc);
+
+			// close connection
+			proc_close($proc);
+
+			if ($result && ($json = json_decode($result, true)) !== null) {
+				$output = [];
+				foreach ($json AS $item) {
+					$output[] = 'Line: '.$item['lineNumber'].', Index: '.$item['index'].' - '.$item['description'];//.' ('.substr($js, $item['index'] - 100, 200).')';
+				}
+			}
+			// var_dump($output, $result, $error, $status);
+			// exit();
+			return $status['exitcode'] === 0 ? 0 : count($output);
+		}
+		return null;
+	}
 ];
 $obj = new \hexydec\minify\compare($minifiers, $config);
-exit($obj->drawPage($urls));
+exit($obj->drawPage($urls, null, !isset($_GET['nocache'])));

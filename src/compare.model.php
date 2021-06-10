@@ -64,7 +64,7 @@ class compareModel {
 		return false;
 	}
 
-	protected function minifyUrls(array $urls) {
+	protected function minifyUrls(array $urls, bool $cache = true) {
 		$stats = [];
 		foreach ($urls AS $url) {
 
@@ -73,7 +73,7 @@ class compareModel {
 				$stats[$url] = [
 					'input' => strlen($input),
 					'inputgzip' => strlen(gzencode($input)),
-					'errors' => $this->validate($input, $validator),
+					'errors' => $this->validate($input, $validator, $cache),
 					'validator' => $validator,
 					'minifiers' => [],
 					'best' => [],
@@ -94,7 +94,7 @@ class compareModel {
 						'output' => strlen($output),
 						'outputgzip' => $output ? strlen(gzencode($output)) : 0,
 						'time' => $finish - $start,
-						'errors' => $this->validate($output, $validator),
+						'errors' => $this->validate($output, $validator, $cache),
 						'validator' => $validator
 					];
 					$stat['irregular'] = $stat['output'] < ($stats[$url]['input'] * 0.4);
@@ -127,12 +127,12 @@ class compareModel {
 		}
 	}
 
-	protected function validate(string $code, ?array &$output = null) : ?int {
+	protected function validate(string $code, ?array &$output = null, bool $cache = true) : ?int {
 		if (!empty($this->config['validator'])) {
 
 			// pull from cache
-			$cache = $this->config['cache'] ? dirname(__DIR__).'/cache/'.md5($code).'.json' : null;
-			if (file_exists($cache) && ($json = file_get_contents($cache)) !== false && ($data = json_decode($json, true)) !== null) {
+			$file = $this->config['cache'] ? dirname(__DIR__).'/cache/'.md5($code).'.json' : null;
+			if ($cache && \file_exists($file) && ($json = \file_get_contents($file)) !== false && ($data = json_decode($json, true)) !== null) {
 				$output = $data['output'];
 				return $data['errors'];
 			} else {
@@ -149,8 +149,8 @@ class compareModel {
 				if (($errors = $this->config['validator']($code, $output)) !== false) {
 
 					// save to cache
-					if ($cache) {
-						file_put_contents($cache, json_encode([
+					if ($file) {
+						file_put_contents($file, json_encode([
 							'errors' => $errors,
 							'output' => $output
 						]));
@@ -234,8 +234,8 @@ class compareModel {
 		return $stats;
 	}
 
-	public function getMinifyStats(array $urls) {
-		if (($stats = $this->minifyUrls($urls)) !== false) {
+	public function getMinifyStats(array $urls, bool $cache = true) {
+		if (($stats = $this->minifyUrls($urls, $cache)) !== false) {
 			$stats['Total'] = $this->getTotals($stats);
 			return $this->getBestAndWorst($stats);
 		}
