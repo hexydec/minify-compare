@@ -395,20 +395,20 @@
         },
         {
             "name": "hexydec/cssdoc",
-            "version": "0.4.0",
+            "version": "0.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "bbc7d4eeccd840bb3bfc3d4d521374b44158fe8e"
+                "reference": "dce6e5a58a71cf2604a767d677ca06b552435db6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/bbc7d4eeccd840bb3bfc3d4d521374b44158fe8e",
-                "reference": "bbc7d4eeccd840bb3bfc3d4d521374b44158fe8e",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/dce6e5a58a71cf2604a767d677ca06b552435db6",
+                "reference": "dce6e5a58a71cf2604a767d677ca06b552435db6",
                 "shasum": ""
             },
             "require": {
-                "hexydec/tokenise": "0.4.0",
+                "hexydec/tokenise": "0.4.1",
                 "php": ">=7.3"
             },
             "require-dev": {
@@ -434,9 +434,9 @@
             "description": "A token based CSS Document parser and minifier written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/cssdoc/issues",
-                "source": "https://github.com/hexydec/cssdoc/tree/0.4.0"
+                "source": "https://github.com/hexydec/cssdoc/tree/0.5.1"
             },
-            "time": "2021-05-26T16:19:26+00:00"
+            "time": "2021-06-10T22:48:26+00:00"
         },
         {
             "name": "hexydec/htmldoc",
@@ -444,18 +444,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/htmldoc.git",
-                "reference": "2db84fa01d77a91448923a8d5643dd0f521c8e7e"
+                "reference": "5ef75ef7a57ff2ba61f6e09f1a84f2ce7d672d04"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/htmldoc/zipball/2db84fa01d77a91448923a8d5643dd0f521c8e7e",
-                "reference": "2db84fa01d77a91448923a8d5643dd0f521c8e7e",
+                "url": "https://api.github.com/repos/hexydec/htmldoc/zipball/5ef75ef7a57ff2ba61f6e09f1a84f2ce7d672d04",
+                "reference": "5ef75ef7a57ff2ba61f6e09f1a84f2ce7d672d04",
                 "shasum": ""
             },
             "require": {
-                "hexydec/cssdoc": "0.4.0",
-                "hexydec/jslite": "0.5.0",
-                "hexydec/tokenise": "0.4.0",
+                "hexydec/cssdoc": "0.5.1",
+                "hexydec/jslite": "0.5.1",
+                "hexydec/tokenise": "0.4.1",
                 "php": ">=7.3"
             },
             "require-dev": {
@@ -482,26 +482,26 @@
             "description": "A token based HTML Document parser and minifier written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/htmldoc/issues",
-                "source": "https://github.com/hexydec/htmldoc/tree/master"
+                "source": "https://github.com/hexydec/htmldoc/tree/v1.2.4"
             },
-            "time": "2021-05-30T23:11:25+00:00"
+            "time": "2021-06-10T22:55:10+00:00"
         },
         {
             "name": "hexydec/jslite",
-            "version": "0.5.0",
+            "version": "0.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "54fe9e19657132cf0018634ee728493031542925"
+                "reference": "24c47af89cc9d4f807fe6d3377e37ce10052f19f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/54fe9e19657132cf0018634ee728493031542925",
-                "reference": "54fe9e19657132cf0018634ee728493031542925",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/24c47af89cc9d4f807fe6d3377e37ce10052f19f",
+                "reference": "24c47af89cc9d4f807fe6d3377e37ce10052f19f",
                 "shasum": ""
             },
             "require": {
-                "hexydec/tokenise": "0.4.0",
+                "hexydec/tokenise": "0.4.1",
                 "php": ">=7.3"
             },
             "require-dev": {
@@ -527,22 +527,22 @@
             "description": "A token based Javascript parser/minifier designed for compressing inline scripts on the fly, written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/jslite/issues",
-                "source": "https://github.com/hexydec/jslite/tree/0.5.0"
+                "source": "https://github.com/hexydec/jslite/tree/0.5.1"
             },
-            "time": "2021-05-26T16:09:23+00:00"
+            "time": "2021-06-10T22:36:12+00:00"
         },
         {
             "name": "hexydec/tokenise",
-            "version": "0.4.0",
+            "version": "0.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/tokenise.git",
-                "reference": "fb449b74e11b9cb15d4977f43dbb941d6a2fe300"
+                "reference": "267d5662a728d6219eb9ee57f503e93cf6503f41"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/fb449b74e11b9cb15d4977f43dbb941d6a2fe300",
-                "reference": "fb449b74e11b9cb15d4977f43dbb941d6a2fe300",
+                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/267d5662a728d6219eb9ee57f503e93cf6503f41",
+                "reference": "267d5662a728d6219eb9ee57f503e93cf6503f41",
                 "shasum": ""
             },
             "require": {
@@ -571,9 +571,9 @@
             "description": "A program for performing lexical analysis, written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/tokenise/issues",
-                "source": "https://github.com/hexydec/tokenise/tree/0.4.0"
+                "source": "https://github.com/hexydec/tokenise/tree/0.4.1"
             },
-            "time": "2021-05-22T16:48:33+00:00"
+            "time": "2021-06-10T22:19:25+00:00"
         },
         {
             "name": "illuminate/console",
@@ -4910,16 +4910,16 @@
         },
         {
             "name": "wikimedia/minify",
-            "version": "2.2.2",
+            "version": "2.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wikimedia/minify.git",
-                "reference": "b60c962090714a96de9814d2c4c893b92cc6f9e3"
+                "reference": "a4ac6e90badda9adfc2ef641f122382a8de629d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wikimedia/minify/zipball/b60c962090714a96de9814d2c4c893b92cc6f9e3",
-                "reference": "b60c962090714a96de9814d2c4c893b92cc6f9e3",
+                "url": "https://api.github.com/repos/wikimedia/minify/zipball/a4ac6e90badda9adfc2ef641f122382a8de629d6",
+                "reference": "a4ac6e90badda9adfc2ef641f122382a8de629d6",
                 "shasum": ""
             },
             "require": {
@@ -4927,12 +4927,12 @@
                 "php": ">=7.2.9"
             },
             "require-dev": {
-                "mediawiki/mediawiki-codesniffer": "35.0.0",
+                "mediawiki/mediawiki-codesniffer": "36.0.0",
                 "mediawiki/mediawiki-phan-config": "0.10.6",
                 "mediawiki/minus-x": "1.1.1",
                 "ockcyp/covers-validator": "1.3.3",
                 "php-parallel-lint/php-console-highlighter": "0.5.0",
-                "php-parallel-lint/php-parallel-lint": "1.2.0",
+                "php-parallel-lint/php-parallel-lint": "1.3.0",
                 "phpunit/phpunit": "^8.5",
                 "wikimedia/testing-access-wrapper": "~2.0"
             },
@@ -4970,15 +4970,9 @@
             "description": "Minification of JavaScript code and CSS stylesheets.",
             "homepage": "https://gerrit.wikimedia.org/g/mediawiki/libs/Minify",
             "support": {
-                "source": "https://github.com/wikimedia/minify/tree/2.2.2"
+                "source": "https://github.com/wikimedia/minify/tree/2.2.3"
             },
-            "funding": [
-                {
-                    "url": "https://donate.wikimedia.org/?utm_medium=githubRepo",
-                    "type": "custom"
-                }
-            ],
-            "time": "2021-05-07T23:22:12+00:00"
+            "time": "2021-06-07T18:55:33+00:00"
         },
         {
             "name": "wyrihaximus/compress",
