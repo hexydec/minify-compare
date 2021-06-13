@@ -444,12 +444,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/htmldoc.git",
-                "reference": "5ef75ef7a57ff2ba61f6e09f1a84f2ce7d672d04"
+                "reference": "82b58784019b3752c3db11119703c0dea6494b53"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/htmldoc/zipball/5ef75ef7a57ff2ba61f6e09f1a84f2ce7d672d04",
-                "reference": "5ef75ef7a57ff2ba61f6e09f1a84f2ce7d672d04",
+                "url": "https://api.github.com/repos/hexydec/htmldoc/zipball/82b58784019b3752c3db11119703c0dea6494b53",
+                "reference": "82b58784019b3752c3db11119703c0dea6494b53",
                 "shasum": ""
             },
             "require": {
@@ -482,9 +482,9 @@
             "description": "A token based HTML Document parser and minifier written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/htmldoc/issues",
-                "source": "https://github.com/hexydec/htmldoc/tree/v1.2.4"
+                "source": "https://github.com/hexydec/htmldoc/tree/v1.2.5"
             },
-            "time": "2021-06-10T22:55:10+00:00"
+            "time": "2021-06-13T14:51:20+00:00"
         },
         {
             "name": "hexydec/jslite",
@@ -3364,16 +3364,16 @@
         },
         {
             "name": "sebastian/global-state",
-            "version": "5.0.2",
+            "version": "5.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/global-state.git",
-                "reference": "a90ccbddffa067b51f574dea6eb25d5680839455"
+                "reference": "23bd5951f7ff26f12d4e3242864df3e08dec4e49"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/global-state/zipball/a90ccbddffa067b51f574dea6eb25d5680839455",
-                "reference": "a90ccbddffa067b51f574dea6eb25d5680839455",
+                "url": "https://api.github.com/repos/sebastianbergmann/global-state/zipball/23bd5951f7ff26f12d4e3242864df3e08dec4e49",
+                "reference": "23bd5951f7ff26f12d4e3242864df3e08dec4e49",
                 "shasum": ""
             },
             "require": {
@@ -3416,7 +3416,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/global-state/issues",
-                "source": "https://github.com/sebastianbergmann/global-state/tree/5.0.2"
+                "source": "https://github.com/sebastianbergmann/global-state/tree/5.0.3"
             },
             "funding": [
                 {
@@ -3424,7 +3424,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-10-26T15:55:19+00:00"
+            "time": "2021-06-11T13:31:12+00:00"
         },
         {
             "name": "sebastian/lines-of-code",

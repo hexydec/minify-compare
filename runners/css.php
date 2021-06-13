@@ -64,30 +64,44 @@ $urls = [
 ];
 $config = [
 	'title' => 'CSS Minifiers',
-	'cache' => !isset($_GET['nocache']),
-	'validator' => function (string $css, ?array &$output = null) {
-		$url = 'https://validator.w3.org/nu/?out=json&css=yes';
-		$context = stream_context_create([
-			'http' => [
-				'header' => [
-					'Content-type: text/css; charset=utf-8'
-				],
-				'user_agent' => 'hexydec/minify-compare',
-				'method' => 'POST',
-				'content' => $css
-			]
-		]);
-		if (($json = file_get_contents($url, false, $context)) !== false && ($data = json_decode($json, true)) !== null) {
-			$output = [];
-			foreach ($data['messages'] AS $item) {
-				if ($item['type'] === 'error') {
-					$output[] = $item['message'];
+	'validator' => function (string $html, ?array &$output = null) {
+		if (strlen($html) < 500000) {
+
+			// list of validators we can use
+			$validators = ['https://html5.validator.nu/?out=json', 'https://validator.nu/?out=json', 'https://validator.w3.org/nu/?out=json'];
+			static $index = 0;
+
+			// create context
+			$context = stream_context_create([
+				'http' => [
+					'header' => [
+						'Content-type: text/html; charset=utf-8'
+					],
+					'user_agent' => 'hexydec/minify-compare',
+					'method' => 'POST',
+					'content' => $html,
+					'timeout' => 10
+				]
+			]);
+			if (($json = file_get_contents($validators[$index], false, $context)) !== false && ($data = json_decode($json, true)) !== null) {
+
+				// compile errors
+				$output = [];
+				foreach ($data['messages'] AS $item) {
+					if ($item['type'] === 'error') {
+						$output[] = $item['message'];
+					}
 				}
+
+				// cycle to the next validator
+				if (!isset($validators[++$index])) {
+					$index = 0;
+				}
+				return count($output);
 			}
-			return count($output);
 		}
 		return false;
 	}
 ];
 $obj = new \hexydec\minify\compare($minifiers, $config);
-exit($obj->drawPage($urls));
+exit($obj->drawPage($urls, null, !isset($_GET['nocache'])));

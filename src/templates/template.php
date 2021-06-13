@@ -99,6 +99,9 @@
 				flex: 1 1 auto;
 				margin: 0;
 			}
+			.minify__popup-output-item--error {
+				color: red;
+			}
 			.minify__popup-heading {
 				margin: 0;
 			}

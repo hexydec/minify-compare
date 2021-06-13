@@ -36,7 +36,7 @@ class compareView {
 
 	public function drawMinifierOutput(string $minifier, string $url) {
 		if (($input = $this->model->fetch($url)) !== false) {
-			return $this->model->minify($this->model->minifiers[$minifier], $input, $url);
+			return $this->model->minify($minifier, $input, $url);
 		}
 		return null;
 	}

@@ -37,12 +37,12 @@
 					</h3>
 				</td>
 				<td>Uncompressed</td>
-				<td<?= $data['errors'] ? ' class="minify__table--failed" title="There were '.$data['errors'].' errors in the code"' : ''; ?>><?= number_format($data['input']); ?></td>
+				<td<?= $data['validationerrors'] ? ' class="minify__table--failed" title="There were '.$data['validationerrors'].' validation errors in the code"' : ''; ?>><?= number_format($data['input']); ?></td>
 				<td rowspan="2">
 					<?php if ($isurl) {
-						if ($data['errors'] !== null) { ?>
+						if ($data['validationerrors'] !== null) { ?>
 							<input type="checkbox" name="popup" id="popup-input-<?= $i; ?>" value="" class="minify__popup-switch" />
-							<label for="popup-input-<?= $i; ?>" class="minify__popup-label <?= $data['errors'] ? 'icon-cross' : 'icon-tick'; ?>" title="View validation results"></label>
+							<label for="popup-input-<?= $i; ?>" class="minify__popup-label <?= $data['validationerrors'] ? 'icon-cross' : 'icon-tick'; ?>" title="View validation results"></label>
 							<div class="minify__popup">
 								<div class="minify__popup-inner">
 									<label class="minify__popup-close icon-cross" for="popup-input-<?= $i; ?>">Close</label>
@@ -51,7 +51,7 @@
 										<a href="<?= htmlspecialchars($url); ?>" target="_blank" rel="noopener"><?= htmlspecialchars($url); ?></a>
 									</p>
 									<h3 class="minify__popup-subheading">
-										The input contained <?= $data['errors'] ? $data['errors'].' error'.($data['errors'] === 1 ? '' : 's') : 'no errors'; ?>
+										The input contained <?= $data['validationerrors'] ? $data['validationerrors'].' error'.($data['validationerrors'] === 1 ? '' : 's') : 'no errors'; ?>
 										<a href="<?= htmlspecialchars($url); ?>" target="_blank" title="View source code" class="minify__popup-code icon-code"></a>
 									</h3>
 									<ol class="minify__popup-output"><li><?= implode('</li><li>', array_map('htmlspecialchars', $data['validator'] ?? [])); ?></li></ol>
@@ -66,7 +66,7 @@
 				$n = -1;
 				foreach ($data['minifiers'] AS $key => $item) {
 					$n++;
-					if ($item['irregular'] || $item['errors'] > $data['errors']) {
+					if ($item['irregular'] || $item['validationerrors'] > $data['validationerrors']) {
 						$cls = ' class="minify__table--failed"';
 					} elseif ($data['best']['output'] === $key) {
 						$cls = ' class="minify__table--best"';
@@ -75,18 +75,18 @@
 					} else {
 						$cls = '';
 					}
-					if ($item['errors']) {
-						$cls .= ' title="There were '.$item['errors'].' errors in the code"';
+					if ($item['validationerrors']) {
+						$cls .= ' title="There were '.$item['validationerrors'].' validation errors in the code"';
 					} ?>
-					<td rowspan="2" class="minify__table-start<?= $data['best']['time'] === $key ? ' minify__table--best' : ($data['worst']['time'] === $key ? ' minify__table--worst' : ''); ?>"><?= number_format($item['time'], 8); ?></td>
+					<td rowspan="2" class="minify__table-start<?= ($data['best']['time'] ?? '') === $key ? ' minify__table--best' : (($data['worst']['time'] ?? '') === $key ? ' minify__table--worst' : ''); ?>"><?= number_format($item['time'], 8); ?></td>
 					<td><?= number_format($item['output']); ?></td>
 					<td><?= number_format($item['diff']); ?></td>
 					<td<?= $cls; ?>><?= number_format($item['ratio'], 2); ?>%</td>
 					<td rowspan="2">
 						<?php if ($isurl) {
-							if ($item['errors'] !== null) { ?>
+							if ($item['validationerrors'] !== null) { ?>
 								<input type="checkbox" name="popup" id="popup-<?= $i.'-'.$n; ?>" value="" class="minify__popup-switch" />
-								<label for="popup-<?= $i.'-'.$n; ?>" class="minify__popup-label <?= $item['errors'] ? 'icon-cross' : 'icon-tick'; ?>" title="View validation results and output code"></label>
+								<label for="popup-<?= $i.'-'.$n; ?>" class="minify__popup-label <?= $item['validationerrors'] ? 'icon-cross' : 'icon-tick'; ?>" title="View validation results and output code"></label>
 								<div class="minify__popup">
 									<div class="minify__popup-inner">
 										<label class="minify__popup-close icon-cross" for="popup-<?= $i.'-'.$n; ?>">Close</label>
@@ -95,12 +95,33 @@
 											<a href="<?= htmlspecialchars($url); ?>" target="_blank" rel="noopener"><?= htmlspecialchars($url); ?></a>
 										</p>
 										<h3 class="minify__popup-subheading">
-											The input contained <?= $data['errors'] ? $data['errors'].' error'.($data['errors'] === 1 ? '' : 's') : 'no errors'; ?>, and the output contained <?= $item['errors'] ? $item['errors'].' error'.($item['errors'] === 1 ? '' : 's') : 'no errors'; ?>
+											The input contained <?= $data['validationerrors'] ? $data['validationerrors'].' error'.($data['validationerrors'] === 1 ? '' : 's') : 'no errors'; ?>, and the output contained <?= $item['validationerrors'] ? $item['validationerrors'].' error'.($item['validationerrors'] === 1 ? '' : 's') : 'no errors'; ?>
 											<a href="?action=code&amp;minifier=<?= htmlspecialchars($key); ?>&amp;url=<?= urlencode($url); ?>" target="_blank" title="View source code" class="minify__popup-code icon-code"></a>
 										</h3>
-										<ol class="minify__popup-output"><li><?= implode('</li><li>', array_map('htmlspecialchars', $item['validator'] ?? [])); ?></li></ol>
+										<?php if ($item['validator']) { ?>
+											<ol class="minify__popup-output">
+												<?php
+												$c = 0; // compare against
+												foreach ($item['validator'] AS $v => $value) {
+													if (isset($data['validator'][$c]) && $data['validator'][$c] === $value) {
+														$same = true;
+														++$c;
+													} else {
+														$same = false;
+														if ($data['validator'][$c + 1] === $value) {
+															++$c;
+														}
+													} ?>
+													<li<?= $same ? '' : ' class="minify__popup-output-item--error"'; ?>>
+														<?= htmlspecialchars($value); ?>
+													</li>
+												<?php } ?>
+											</ol>
+										<?php } ?>
 									</div>
 								</div>
+							<?php } else { ?>
+								<a href="?action=code&amp;minifier=<?= htmlspecialchars($key); ?>&amp;url=<?= urlencode($url); ?>" target="_blank" title="View source code" class="minify__popup-label icon-code"></a>
 							<?php }
 						} ?>
 					</td>
@@ -108,13 +129,13 @@
 			</tr>
 			<tr>
 				<td>Gzipped</td>
-				<td<?= $data['errors'] ? ' class="minify__table--failed" title="There were '.$data['errors'].' errors in the code"' : ''; ?>><?= number_format($data['inputgzip']); ?></td>
+				<td<?= $data['validationerrors'] ? ' class="minify__table--failed" title="There were '.$data['validationerrors'].' validation errors in the code"' : ''; ?>><?= number_format($data['inputgzip']); ?></td>
 				<?php foreach ($data['minifiers'] AS $key => $item) {
-					if ($item['irregular'] || $item['errors'] > $data['errors']) {
+					if ($item['irregular'] || $item['validationerrors'] > $data['validationerrors']) {
 						$cls = ' class="minify__table--failed"';
-					} elseif ($data['best']['outputgzip'] === $key) {
+					} elseif (($data['best']['outputgzip'] ?? '') === $key) {
 						$cls = ' class="minify__table--best"';
-					} elseif ($data['worst']['outputgzip'] === $key) {
+					} elseif (($data['worst']['outputgzip'] ?? '') === $key) {
 						$cls = ' class="minify__table--worst"';
 					} else {
 						$cls = '';

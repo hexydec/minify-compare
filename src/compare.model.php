@@ -13,13 +13,14 @@ class compareModel {
 	public $action = null;
 	public $minifier = null;
 	public $url = null;
+	public $errors = [];
 
 	public function __construct(array $minifiers, array $config) {
 		$this->minifiers = $minifiers;
 		$this->config = array_merge($this->config, $config);
 	}
 
-	public function fetch($url) {
+	public function fetch(string $url) {
 		$cache = dirname(__DIR__).'/cache/'.preg_replace('/[^0-9a-z]++/i', '-', $url).'.cache';
 		if ($this->config['cache'] && file_exists($cache)) {
 			$url = $cache;
@@ -28,10 +29,10 @@ class compareModel {
 			'http' => [
 				'headers' => [
 					'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-					'Accept-Encoding: none',
 					'Accept-Language: en-GB,en;q=0.5',
 					'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
-				]
+				],
+				'timeout' => 10
 			]
 		]);
 		$html = file_get_contents($url, false, $context);
@@ -73,7 +74,7 @@ class compareModel {
 				$stats[$url] = [
 					'input' => strlen($input),
 					'inputgzip' => strlen(gzencode($input)),
-					'errors' => $this->validate($input, $validator, $cache),
+					'validationerrors' => $this->validate($input, $validator, $cache),
 					'validator' => $validator,
 					'minifiers' => [],
 					'best' => [],
@@ -85,16 +86,16 @@ class compareModel {
 
 					// minify
 					$start = \microtime(true);
-					$output = $this->minify($item, $input, $url, $error);
+					$output = $this->minify($key, $input, $url);
 					$finish = \microtime(true);
 
 					// calculate stats
 					$stat = [
-						'error' => $error,
+						'errors' => $this->errors[$key] ?? [],
 						'output' => strlen($output),
 						'outputgzip' => $output ? strlen(gzencode($output)) : 0,
 						'time' => $finish - $start,
-						'errors' => $this->validate($output, $validator, $cache),
+						'validationerrors' => $this->validate($output, $validator, $cache),
 						'validator' => $validator
 					];
 					$stat['irregular'] = $stat['output'] < ($stats[$url]['input'] * 0.4);
@@ -109,8 +110,7 @@ class compareModel {
 		return $stats ? $stats : false;
 	}
 
-	public function minify(\Closure $minifier, string $input, string $url, ?string &$error = null) {
-		$error = null;
+	public function minify(string $minifier, string $input, string $url) {
 		\set_time_limit(30);
 
 		// Setup the environment
@@ -118,13 +118,36 @@ class compareModel {
 		$_SERVER['REQUEST_URI'] = parse_url($url, PHP_URL_PATH);
 		$_SERVER['HTTPS'] = mb_strpos($url, 'https://') === 0 ? 'on' : '';
 
+		// setup error handler
+		set_error_handler(function (int $type, string $msg, ?string $file = null, ?int $line = null) use ($minifier) {
+			if (!isset($this->errors[$minifier])) {
+				$this->errors[$minifier] = [];
+			}
+			$this->errors[$minifier][] = [
+				'type' => 'user',
+				'code' => $type,
+				'msg' => $msg,
+				'file' => $file,
+				'line' => $line
+			];
+		});
+
+		// setup exception handler
+		set_exception_handler(function ($e) use ($minifier) {
+			if (!isset($this->errors[$minifier])) {
+				$this->errors[$minifier] = [];
+			}
+			$this->errors[$minifier][] = [
+				'type' => 'error',
+				'code' => $e->getCode(),
+				'msg' => $e->getMessage(),
+				'file' => $e->getFile(),
+				'line' => $e->getLine()
+			];
+		});
+
 		// minify
-		try {
-			return call_user_func($minifier, $input, $url);
-		} catch (Throwable $e) {
-			$error = $e->getMessage();
-			return false;
-		}
+		return call_user_func($this->minifiers[$minifier], $input, $url);
 	}
 
 	protected function validate(string $code, ?array &$output = null, bool $cache = true) : ?int {
@@ -132,7 +155,7 @@ class compareModel {
 
 			// pull from cache
 			$file = $this->config['cache'] ? dirname(__DIR__).'/cache/'.md5($code).'.json' : null;
-			if ($cache && \file_exists($file) && ($json = \file_get_contents($file)) !== false && ($data = json_decode($json, true)) !== null) {
+			if ($cache && \file_exists($file) && ($json = \file_get_contents($file)) !== false && ($data = \json_decode($json, true)) !== null) {
 				$output = $data['output'];
 				return $data['errors'];
 			} else {
@@ -210,8 +233,8 @@ class compareModel {
 			$keys = ['time', 'output', 'outputgzip'];
 			foreach ($stat['minifiers'] AS $key => $item) {
 				foreach ($keys AS $metric) {
-					if (!$item['irregular']) { // only check minfiers that produced an output
-						if (!isset($best[$metric]) || $item[$metric] < $best[$metric]['value']) {
+					if (!$item['irregular'] && $item['errors'] <= $stat['errors']) { // only check minfiers that produced an output
+						if (!isset($best[$metric]) || $item[$metric] <= $best[$metric]['value']) {
 							$best[$metric] = [
 								'metric' => $metric,
 								'minifier' => $key,

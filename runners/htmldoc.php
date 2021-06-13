@@ -4,16 +4,50 @@ require($dir.'/vendor/autoload.php');
 ini_set('memory_limit', '256M');
 
 $minifiers = [
-	'hexydec/htmldoc' => function (string $html, string $url) use ($dir) {
+	'HTML Only' => function (string $html, string $url) use ($dir) {
+		$obj = new \hexydec\html\htmldoc();
+		if ($obj->load($html)) {
+			$obj->minify(['style' => false, 'script' => false]);
+			return $obj->html();
+		}
+		return false;
+	},
+	'HTML + CSS' => function (string $html, string $url) use ($dir) {
 		$obj = new \hexydec\html\htmldoc([
 			'custom' => [
 				'style' => [
-					'cache' => $dir.'/cache/%s.css',
-					// 'minifier' => null
+					'cache' => null
+				]
+			]
+		]);
+		if ($obj->load($html)) {
+			$obj->minify(['script' => false]);
+			return $obj->html();
+		}
+		return false;
+	},
+	'HTML + Javascript' => function (string $html, string $url) use ($dir) {
+		$obj = new \hexydec\html\htmldoc([
+			'custom' => [
+				'script' => [
+					'cache' => null
+				]
+			]
+		]);
+		if ($obj->load($html)) {
+			$obj->minify(['style' => false]);
+			return $obj->html();
+		}
+		return false;
+	},
+	'HTML + CSS + Javascript' => function (string $html, string $url) use ($dir) {
+		$obj = new \hexydec\html\htmldoc([
+			'custom' => [
+				'style' => [
+					'cache' => null
 				],
 				'script' => [
-					'cache' => $dir.'/cache/%s.js',
-					// 'minifier' => null
+					'cache' => null
 				]
 			]
 		]);
@@ -23,23 +57,23 @@ $minifiers = [
 		}
 		return false;
 	},
-	'voku/html-min' => function (string $html) {
-		$htmlMin = new \voku\helper\HtmlMin();
-		return $htmlMin->minify($html);
+	'HTML + CSS + Javascript (Cached)' => function (string $html, string $url) use ($dir) {
+		$obj = new \hexydec\html\htmldoc([
+			'custom' => [
+				'style' => [
+					'cache' => $dir.'/cache/%s.css'
+				],
+				'script' => [
+					'cache' => $dir.'/cache/%s.js'
+				]
+			]
+		]);
+		if ($obj->load($html)) {
+			$obj->minify();
+			return $obj->html();
+		}
+		return false;
 	},
-	'mrclay/minify' => function (string $html) {
-		return Minify_HTML::minify($html);
-	},
-	'taufik-nurrohman' => function (string $html) {
-		return minify_html($html);
-	},
-	// 'pfaciana/tiny-html-minifier' => function (string $html) { // incorrect
-	// 	return \Minifier\TinyMinify::html($html);
-	// },
-	// 'deruli/html-minifier' => function (string $html) { // so slow
-	// 	$obj = new \zz\Html\HTMLMinify($html);
-	// 	return $obj->process();
-	// }
 ];
 
 $urls = [
@@ -180,50 +214,9 @@ $urls = [
 	'https://www.matthewbarby.com/',
 	'http://wilwheaton.net/'
 ];
-// $urls = [
-// 	'https://blog.mozilla.org/'
-// ];
 
 $config = [
-	'title' => 'HTML Minifiers',
-	'validator' => function (string $html, ?array &$output = null) {
-		if (strlen($html) < 500000) {
-
-			// list of validators we can use
-			$validators = ['https://html5.validator.nu/?out=json', 'https://validator.nu/?out=json', 'https://validator.w3.org/nu/?out=json'];
-			static $index = 0;
-
-			// create context
-			$context = stream_context_create([
-				'http' => [
-					'header' => [
-						'Content-type: text/html; charset=utf-8'
-					],
-					'user_agent' => 'hexydec/minify-compare',
-					'method' => 'POST',
-					'content' => $html,
-					'timeout' => 10
-				]
-			]);
-			if (($json = file_get_contents($validators[$index], false, $context)) !== false && ($data = json_decode($json, true)) !== null) {
-
-				// compile errors
-				$output = [];
-				foreach ($data['messages'] AS $item) {
-					if ($item['type'] === 'error') {
-						$output[] = $item['message'];
-					}
-				}
-
-				// cycle to the next validator
-				if (!isset($validators[++$index])) {
-					$index = 0;
-				}
-				return count($output);
-			}
-		}
-		return false;
-	}
+	'title' => 'HTMLdoc Minification Comparison'
 ];
 $obj = new \hexydec\minify\compare($minifiers, $config);
 // $url = 'https://kinsta.com/blog/wordpress-site-examples/';
