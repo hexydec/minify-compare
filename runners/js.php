@@ -33,7 +33,7 @@ $minifiers = [
 ];
 
 $urls = [
-	'https://github.com/hexydec/dabby/releases/download/0.9.13/dabby.js',
+	'https://github.com/hexydec/dabby/releases/download/v0.9.13/dabby.js',
 	'https://code.jquery.com/jquery-3.6.0.js',
 	'https://cdnjs.cloudflare.com/ajax/libs/vue/3.0.11/vue.runtime.esm-browser.js',
 	'https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.js',
