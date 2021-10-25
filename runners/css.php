@@ -101,7 +101,8 @@ $config = [
 			}
 		}
 		return false;
-	}
+	},
+	'cache' => !isset($_GET['nocache'])
 ];
-$obj = new \hexydec\minify\compare($minifiers, $config);
-exit($obj->drawPage($urls, null, !isset($_GET['nocache'])));
+$obj = new \hexydec\minify\compare($minifiers, $urls, $config);
+exit($obj->drawPage());

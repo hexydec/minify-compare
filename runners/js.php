@@ -33,7 +33,7 @@ $minifiers = [
 ];
 
 $urls = [
-	'https://github.com/hexydec/dabby/releases/download/v0.9.13/dabby.js',
+	'https://github.com/hexydec/dabby/releases/download/v0.9.14/dabby.js',
 	'https://code.jquery.com/jquery-3.6.0.js',
 	'https://cdnjs.cloudflare.com/ajax/libs/vue/3.0.11/vue.runtime.esm-browser.js',
 	'https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.js',
@@ -94,7 +94,8 @@ $config = [
 			return $status['exitcode'] === 0 ? 0 : count($output);
 		}
 		return null;
-	}
+	},
+	'cache' => !isset($_GET['nocache'])
 ];
-$obj = new \hexydec\minify\compare($minifiers, $config);
-exit($obj->drawPage($urls, null, !isset($_GET['nocache'])));
+$obj = new \hexydec\minify\compare($minifiers, $urls, $config);
+exit($obj->drawPage());

@@ -16,7 +16,22 @@ class compareView {
 		return null;
 	}
 
-	public function drawCompare(array $urls, bool $cache = true) {
+	public function drawCompare(array $urls, bool $cache = true) : string {
+
+		// render the table
+		$table = $this->compile([
+			'minifiers' => array_keys($this->model->minifiers),
+			'urls' => $urls
+		], __DIR__.'/templates/table-ajax.php');
+
+		// wrap in a template
+		return $this->compile([
+			'title' => $this->model->config['title'],
+			'table' => $table
+		], __DIR__.'/templates/template.php');
+	}
+
+	public function drawCompareOld(array $urls, bool $cache = true) {
 		if (($stats = $this->model->getMinifyStats($urls, $cache)) !== false) {
 
 			// render the table

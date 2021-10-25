@@ -30,7 +30,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.3",
-		"hexydec/htmldoc": "@dev",
+		"hexydec/htmldoc": "^1.3.0",
         "arjanschouten/htmlminifier": "^0.0.2",
         "voku/html-min": "^4.4",
         "wyrihaximus/html-compress": "^4.1",

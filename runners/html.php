@@ -223,10 +223,11 @@ $config = [
 			}
 		}
 		return false;
-	}
+	},
+	'cache' => !isset($_GET['nocache'])
 ];
-$obj = new \hexydec\minify\compare($minifiers, $config);
+$obj = new \hexydec\minify\compare($minifiers, $urls, $config);
 // $url = 'https://kinsta.com/blog/wordpress-site-examples/';
 // $selector = 'h3 > a';
 // exit($obj->drawPage($url, $selector));
-exit($obj->drawPage($urls, null, !isset($_GET['nocache'])));
+exit($obj->drawPage());
