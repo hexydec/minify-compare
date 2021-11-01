@@ -29,7 +29,7 @@
 				</td>
 				<td>Uncompressed</td>
 				<td class="minify__input"></td>
-				<td class="minify__input-code" rowspan="2"></td>
+				<td class="minify__inputerrors" rowspan="2"></td>
 				<?php
 				$n = -1;
 				foreach ($minifiers AS $key => $item) { ?>
@@ -37,7 +37,7 @@
 					<td class="minify__output"></td>
 					<td class="minify__diff"></td>
 					<td class="minify__ratio"></td>
-					<td class="minify__output-code" rowspan="2"></td>
+					<td class="minify__outputerrors" rowspan="2"></td>
 				<?php } ?>
 			</tr>
 			<tr>
@@ -63,7 +63,7 @@
 					<td class="minify__output"></td>
 					<td class="minify__diff"></td>
 					<td class="minify__ratio"></td>
-					<td class="minify__output-code" rowspan="2"></td>
+					<td rowspan="2"></td>
 				<?php } ?>
 			</tr>
 			<tr>
@@ -79,4 +79,5 @@
 		<?php } ?>
 	</tbody>
 </table>
+<div class="minify__progress">Running Tests...</div>
 <script src="../build/minify-compare.js"></script>

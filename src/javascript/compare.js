@@ -1,10 +1,15 @@
 import $ from "../../node_modules/dabbyjs/src/core/dabby/dabby.js";
 import "../../node_modules/dabbyjs/src/core/each/each.js";
+import "../../node_modules/dabbyjs/src/attributes/attr/attr.js";
+import "../../node_modules/dabbyjs/src/attributes/css/css.js";
 import "../../node_modules/dabbyjs/src/utils/each/each.js";
 import "../../node_modules/dabbyjs/src/traversal/eq/eq.js";
 import "../../node_modules/dabbyjs/src/attributes/data/data.js";
+import "../../node_modules/dabbyjs/src/manipulation/html/html.js";
 import "../../node_modules/dabbyjs/src/manipulation/text/text.js";
+import "../../node_modules/dabbyjs/src/manipulation/insert/insert.js";
 import "../../node_modules/dabbyjs/src/traversal/add/add.js";
+import "../../node_modules/dabbyjs/src/traversal/children/children.js";
 import "../../node_modules/dabbyjs/src/traversal/next-prev/next-prev.js";
 import "../../node_modules/dabbyjs/src/attributes/class/class.js";
 import "../../node_modules/dabbyjs/src/events/on/on.js";
@@ -16,25 +21,36 @@ class compare {
 			addcls: "minify__",
 			threads: 4,
 			dataattr: "compare",
-			inputfields: ["input", "inputgzip"],
-			outputfields: ["time", "output", "diff", "ratio", "outputgzip", "diffgzip", "ratiogzip"],
+			inputfields: ["input", "inputgzip", "inputerrors"],
+			outputfields: ["time", "output", "diff", "ratio", "outputgzip", "diffgzip", "ratiogzip", "outputerrors"],
 			comparefields: ["ratio", "ratiogzip", "time"]
 		}, config || {});
 		this.config.cls = "."+this.config.addcls;
+		this.progress = $(this.config.cls + "progress");
 	}
 
 	run(rows) {
 		this.compare = rows;
 		const len = this.compare.length,
+			percentage = 100 / len,
 			promises = [];
 		this.resolvers = [];
 		this.i = 0;
 		this.data = [];
 
+		// show the progress bar
+		this.progress.addClass(this.config.addcls + "progress--running");
+
 		// create promises for each loop
+		let run = 0;
 		for (let p = 0; p < len; p++) {
 			promises.push(new Promise(resolve => {
-				this.resolvers.push(resolve);
+				this.resolvers.push(() => {
+					this.progress
+						.css("--progress", (percentage * run) + "%")
+						.text("Completed test " + (++run) + " of " + len);
+					resolve();
+				});
 			}));
 		}
 
@@ -50,18 +66,80 @@ class compare {
 		}
 	}
 
-	format(key, val) {
+	format(key, val, data) {
 		const format = {
 			ratio: val => parseFloat(val).toFixed(2) + "%",
 			ratiogzip: val => parseFloat(val).toFixed(2) + "%",
-			time: val => parseFloat(val).toFixed(8)
+			time: val => parseFloat(val).toFixed(8),
+			inputerrors: this.validator,
+			outputerrors: this.validator
 		};
 		if (format[key]) {
-			return format[key](val);
+			return format[key](val, data);
 
 		// format the other values
 		} else {
 			return new Intl.NumberFormat("en-GB").format(Math.round(val));
+		}
+	}
+
+	validator(val, data) {
+		if (val) {
+			let validator = $();
+			val.forEach(item => {
+				validator = validator.add($("<li>", {text: item}));
+			});
+			const output = typeof data.outputerrors !== "undefined",
+				nodes = $("<div>")
+					.append($("<input>", {
+						type: "checkbox",
+						name: "popup",
+						id: "popup-" + (output ? "out" : "in") + "put-" + data.index,
+						"class": "minify__popup-switch"
+					}))
+					.append($("<label>", {
+						for: "popup-" + (output ? "out" : "in") + "put-" + data.index,
+						"class": "minify__popup-label " + (val.length > 0 ? "icon-cross" : "icon-tick"),
+						title: "View validation results"
+					}))
+					.append(
+						$("<div>", {"class": "minify__popup"})
+							.append(
+								$("<div>", {"class": "minify__popup-inner"})
+									.append($("<label>", {
+										"class": "minify__popup-close icon-cross",
+										for: "popup-" + (output ? "out" : "in") + "put-" + data.index,
+										text: "Close"
+									}))
+									.append($("<h2>", {"class": "minify__popup-heading", text: (output ? "Out" : "In") + "put Validation"}))
+									.append($("<p>").append($("<a>", {href: data.url, target: "_blank", rel: "noopener", text: data.url})))
+									.append(
+										$("<h3>", {
+											"class": "minify__popup-subheading",
+											text: "The " + (output ? "out" : "in") + "put contained " + (val.length ? val.length + " errors" : "no errors")
+										})
+											.append(
+												$("<a>", {
+													href: data.code || data.url,
+													target: "_blank",
+													title: "View source code",
+													"class": "minify__popup-code icon-code"
+												})
+											)
+									)
+									.append(
+										$("<ul>", {"class": "minify__popup-output"}).append(validator)
+									)
+							)
+					);
+			return nodes.html();
+		} else if (data.url) {
+			return $("<a>", {
+				href: data.url,
+				target: "_blank",
+				title: "View source code",
+				"class": "minify__popup-code icon-tick"
+			}).html();
 		}
 	}
 
@@ -87,14 +165,13 @@ class compare {
 			url = $this.data(this.config.dataattr),
 			rows = $this.add($this.next()),
 			callback = response => {
-				this.resolvers[i](); // resolve this promise
 				if (response.ok) {
 					response.json().then(json => {
 						const metrics = ["best", "worst"];
 
 						// add input sizes
 						this.config.inputfields.forEach(key => {
-							$(this.config.cls + key, rows).text(this.format(key, json[key]));
+							$(this.config.cls + key, rows).html(this.format(key, json[key], json));
 						});
 
 						// add output data
@@ -108,12 +185,16 @@ class compare {
 								minifiers.push(min);
 
 								// store best and worst
-								if (this.config.comparefields.indexOf(key) > -1 && !data.irregular) {
-									values.push(data[key]);
+								if (this.config.comparefields.indexOf(key) > -1) {
+									if (data.irregular) {
+										cells.eq(n).addClass(this.config.addcls + "table--failed");
+									} else {
+										values.push(data[key]);
+									}
 								}
 
 								// render the value
-								cells.eq(n++).text(this.format(key, data[key]));
+								cells.eq(n++).html(this.format(key, data[key], data));
 							});
 
 							// write best and worst
@@ -126,7 +207,12 @@ class compare {
 
 						// save data to calculate totals/averages
 						this.data.push(json);
+						this.resolvers[i](); // resolve this promise
+					}).catch(e => {
+						this.resolvers[i](); // resolve this promise
 					});
+				} else {
+					this.resolvers[i](); // resolve this promise
 				}
 
 				// make the next call
@@ -147,16 +233,21 @@ class compare {
 
 		// input fields
 		this.config.inputfields.forEach(key => {
-			input[key] = 0;
+			const totalcells = $(this.config.cls + key, total),
+				avgcells = $(this.config.cls + key, avg);
 
-			// tot up the input
-			data.forEach(item => {
-				input[key] += item[key];
-			});
+			if (totalcells.length + avgcells.length) {
+				input[key] = 0;
 
-			// render
-			$(this.config.cls + key, total).text(this.format(key, input[key]));
-			$(this.config.cls + key, avg).text(this.format(key, input[key] / data.length));
+				// tot up the input
+				data.forEach(item => {
+					input[key] += item[key];
+				});
+
+				// render
+				totalcells.html(this.format(key, input[key], input));
+				avgcells.html(this.format(key, input[key] / data.length));
+			}
 		});
 
 		// collate output fields
@@ -166,14 +257,12 @@ class compare {
 			// tot up the output
 			let i = 0;
 			$.each(item.minifiers, (min, row) => {
-				if (!values[i]) {
-					values[i] = {};
-				}
+				values[i] = values[i] || {};
 				this.config.outputfields.forEach(key => {
-					if (!values[i][key]) {
-						values[i][key] = 0;
+					values[i][key] = values[i][key] || 0;
+					if (!row.irregular) {
+						values[i][key] += row[key];
 					}
-					values[i][key] += row[key];
 				});
 				i++;
 			});
@@ -182,32 +271,37 @@ class compare {
 		// render output fields
 		const len = data.length;
 		this.config.outputfields.forEach(key => {
-			const totalcells = $(this.config.cls + key, total);
-			const avgcells = $(this.config.cls + key, avg),
+			const totalcells = $(this.config.cls + key, total),
+				avgcells = $(this.config.cls + key, avg),
 				totals = [];
 
 			// render values
-			values.forEach((item, i) => {
-				const suffix = key === "ratiogzip" ? "gzip" : "",
-					avg = ["ratio", "ratiogzip"].indexOf(key) > -1,
-					val = avg ? (100 / input["input" + suffix]) * item["diff" + suffix] * -1 : item[key];
-				totalcells.eq(i).text(this.format(key, val));
-				avgcells.eq(i).text(this.format(key, avg ? val : val / len));
-				totals.push(val);
-			});
-
-			// best and worst
-			if (this.config.comparefields.indexOf(key) > -1) {
-				$.each(this.bestAndWorst(totals, key === "time"), (type, index) => {
-					totalcells.eq(index).add(avgcells.eq(index)).addClass(this.config.addcls + "table--" + type);
+			if (totalcells.length + avgcells.length) {
+				values.forEach((item, i) => {
+					const suffix = key === "ratiogzip" ? "gzip" : "",
+						avg = ["ratio", "ratiogzip"].indexOf(key) > -1,
+						val = avg ? (100 / input["input" + suffix]) * item["diff" + suffix] * -1 : item[key];
+					totalcells.eq(i).html(this.format(key, val));
+					avgcells.eq(i).html(this.format(key, avg ? val : val / len));
+					if (val) {
+						totals[i] = val;
+					}
 				});
+
+				// best and worst
+				if (this.config.comparefields.indexOf(key) > -1) {
+					$.each(this.bestAndWorst(totals, key === "time"), (type, index) => {
+						totalcells.eq(index).add(avgcells.eq(index)).addClass(this.config.addcls + "table--" + type);
+					});
+				}
 			}
 		});
 	}
 }
 
 $(() => {
-	$(".minify__start").on("click", () => {
+	$(".minify__start").one("click", function () {
+		this.style.display = "none";
 		const obj = new compare();
 		obj.run($("[data-compare]"));
 	});

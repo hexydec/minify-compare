@@ -4,18 +4,18 @@
   "description": "A script to compare the performance of PHP code minifiers",
   "main": "runners/html.php",
   "dependencies": {
-    "dabbyjs": "hexydec/dabby#master",
-    "esprima": "^4.0.1",
-    "@babel/core": "^7.15.0",
-    "@babel/preset-env": "^7.15.0",
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
     "babel-preset-minify": "^0.5.1",
+    "dabbyjs": "github:hexydec/dabby#master",
+    "esprima": "^4.0.1",
     "fibers": "^5.0.0",
     "grunt": "^1.4.1",
     "grunt-babel": "*",
     "grunt-contrib-watch": "*",
     "grunt-rollup": "^11.5.0",
     "load-grunt-tasks": "*",
-    "rollup": "^2.56.2"
+    "rollup": "^2.59.0"
   },
   "devDependencies": {},
   "scripts": {

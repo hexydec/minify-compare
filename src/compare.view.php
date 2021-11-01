@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 namespace hexydec\minify;
 
 class compareView {
@@ -7,13 +8,6 @@ class compareView {
 
 	public function __construct(compareModel $model) {
 		$this->model = $model;
-	}
-
-	public function drawCompareScrape(string $url, string $selector, bool $cache = true) : ?string {
-		if (($urls = $this->model->scrapeLinks($url, $selector, $cache)) !== false) {
-			return $this->drawCompare($urls);
-		}
-		return null;
 	}
 
 	public function drawCompare(array $urls, bool $cache = true) : string {
@@ -29,24 +23,6 @@ class compareView {
 			'title' => $this->model->config['title'],
 			'table' => $table
 		], __DIR__.'/templates/template.php');
-	}
-
-	public function drawCompareOld(array $urls, bool $cache = true) {
-		if (($stats = $this->model->getMinifyStats($urls, $cache)) !== false) {
-
-			// render the table
-			$table = $this->compile([
-				'minifiers' => array_keys($this->model->minifiers),
-				'stats' => $stats
-			], __DIR__.'/templates/table.php');
-
-			// wrap in a template
-			return $this->compile([
-				'title' => $this->model->config['title'],
-				'table' => $table
-			], __DIR__.'/templates/template.php');
-		}
-		return null;
 	}
 
 	public function drawMinifierOutput(string $minifier, string $url) {

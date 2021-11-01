@@ -64,8 +64,8 @@ $urls = [
 ];
 $config = [
 	'title' => 'CSS Minifiers',
-	'validator' => function (string $html, ?array &$output = null) {
-		if (strlen($html) < 500000) {
+	'validator' => function (string $css) {
+		if (strlen($css) < 500000) {
 
 			// list of validators we can use
 			$validators = ['https://html5.validator.nu/?out=json', 'https://validator.nu/?out=json', 'https://validator.w3.org/nu/?out=json'];
@@ -79,7 +79,7 @@ $config = [
 					],
 					'user_agent' => 'hexydec/minify-compare',
 					'method' => 'POST',
-					'content' => $html,
+					'content' => $css,
 					'timeout' => 10
 				]
 			]);
@@ -97,7 +97,7 @@ $config = [
 				if (!isset($validators[++$index])) {
 					$index = 0;
 				}
-				return count($output);
+				return $output;
 			}
 		}
 		return false;

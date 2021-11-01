@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 namespace hexydec\minify;
 
 class compare {
@@ -10,12 +11,15 @@ class compare {
 		$this->model = new compareModel($minifiers, $urls, $config);
 		$this->view = new compareView($this->model);
 
+		// get the output from a specific minifier
 		if (($_GET['action'] ?? null) === 'code' && isset($this->model->minifiers[$_GET['minifier'] ?? '']) && !empty($_GET['url'])) {
 			$this->model->action = 'code';
 			$this->model->minifier = $_GET['minifier'];
 			$this->model->url = $_GET['url'];
+
+		// run a test
 		} elseif (isset($_GET['index'], $urls[$_GET['index']])) {
-			if (($data = $this->model->compare($urls[$_GET['index']], $config['cache'])) !== false) {
+			if (($data = $this->model->compare($urls[$_GET['index']], $config['cache'], $_GET['index'])) !== false) {
 				$json = \json_encode($data);
 				\header('Content-type: application/json');
 				\header('Content-length: '.\strlen($json));

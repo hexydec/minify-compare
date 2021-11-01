@@ -4,25 +4,6 @@ require($dir.'/vendor/autoload.php');
 ini_set('memory_limit', '256M');
 
 $minifiers = [
-	'hexydec/htmldoc' => function (string $html, string $url) use ($dir) {
-		$obj = new \hexydec\html\htmldoc([
-			'custom' => [
-				'style' => [
-					'cache' => $dir.'/cache/%s.css',
-					// 'minifier' => null
-				],
-				'script' => [
-					'cache' => $dir.'/cache/%s.js',
-					// 'minifier' => null
-				]
-			]
-		]);
-		if ($obj->load($html)) {
-			$obj->minify();
-			return $obj->html();
-		}
-		return false;
-	},
 	'voku/html-min' => function (string $html) {
 		$htmlMin = new \voku\helper\HtmlMin();
 		return $htmlMin->minify($html);
@@ -33,13 +14,30 @@ $minifiers = [
 	'taufik-nurrohman' => function (string $html) {
 		return minify_html($html);
 	},
-	// 'pfaciana/tiny-html-minifier' => function (string $html) { // incorrect
-	// 	return \Minifier\TinyMinify::html($html);
-	// },
-	// 'deruli/html-minifier' => function (string $html) { // so slow
-	// 	$obj = new \zz\Html\HTMLMinify($html);
-	// 	return $obj->process();
-	// }
+	'pfaciana/tiny-html-minifier' => function (string $html) { // incorrect
+		return \Minifier\TinyMinify::html($html);
+	},
+	'deruli/html-minifier' => function (string $html) { // so slow
+		$obj = new \zz\Html\HTMLMinify($html);
+		return $obj->process();
+	},
+	'hexydec/htmldoc' => function (string $html, string $url) use ($dir) {
+		$obj = new \hexydec\html\htmldoc([
+			'custom' => [
+				'style' => [
+					'cache' => $dir.'/cache/%s.css'
+				],
+				'script' => [
+					'cache' => $dir.'/cache/%s.js'
+				]
+			]
+		]);
+		if ($obj->load($html)) {
+			$obj->minify();
+			return $obj->html();
+		}
+		return false;
+	},
 ];
 
 $urls = [
@@ -95,7 +93,7 @@ $urls = [
 	// 'http://www.gsu.edu/',
 	'http://sprott.carleton.ca',
 	'http://www.cooperhewitt.org/',
-	'http://www.renweb.com/',
+	// 'https://factsmgt.com/',
 	'https://www.lafayette.edu',
 	'http://wheatoncollege.edu/',
 	'https://www.nicholls.edu/',
@@ -151,16 +149,16 @@ $urls = [
 	'https://blogs.wsj.com/law/',
 	// 'https://www.tripadvisor.com/blog/',
 	'https://pulse.target.com/',
-	'http://blog.staples.ca/',
+	// 'http://blog.staples.ca/',
 	'http://blogs.blackberry.com/',
-	'https://blog.rackspace.com/',
+	'https://www.rackspace.com/blog',
 	'https://www.bloomberg.com/professional/blog/',
-	'https://blogs.skype.com/',
-	'http://blogs.reuters.com/',
+	// 'https://blogs.skype.com/',
+	// 'http://blogs.reuters.com/',
 	'http://blog.ted.com/',
 	// 'https://news.sap.com/', // wayyy too many errors
 	'http://newsroom.fb.com/',
-	'https://longitudes.ups.com/',
+	// 'https://longitudes.ups.com/',
 	'https://blog.evernote.com',
 	'http://blog.us.playstation.com/',
 	'http://blog.turbotax.intuit.com',
@@ -186,7 +184,7 @@ $urls = [
 
 $config = [
 	'title' => 'HTML Minifiers',
-	'validator' => function (string $html, ?array &$output = null) {
+	'validator' => function (string $html) {
 		if (strlen($html) < 500000) {
 
 			// list of validators we can use
@@ -219,15 +217,13 @@ $config = [
 				if (!isset($validators[++$index])) {
 					$index = 0;
 				}
-				return count($output);
+				return $output;
 			}
 		}
 		return false;
 	},
 	'cache' => !isset($_GET['nocache'])
 ];
+// $urls = array_slice($urls, 0, 3);
 $obj = new \hexydec\minify\compare($minifiers, $urls, $config);
-// $url = 'https://kinsta.com/blog/wordpress-site-examples/';
-// $selector = 'h3 > a';
-// exit($obj->drawPage($url, $selector));
 exit($obj->drawPage());

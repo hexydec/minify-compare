@@ -127,6 +127,29 @@
 				background: url(data:image/svg+xml;base64,<?= base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="32"><path d="M26 23l3 3 10-10-10-10-3 3 7 7z"></path><path d="M14 9l-3-3-10 10 10 10 3-3-7-7z"></path><path d="M21.916 4.704l2.171 0.592-6 22.001-2.171-0.592 6-22.001z"></path></svg>'); ?>);
 				background-size: contain;
 			}
+
+			:root {
+				--progress: 0%;
+			}
+
+			.minify__progress {
+				opacity: 0;
+				visibility: hidden;
+				transition: all 0.3s;
+				position: fixed;
+				bottom: 20px;
+				right: 20px;
+				padding: 10px;
+				box-shadow: 0 0 5px #CCC;
+				background: linear-gradient(90deg, #afedaf var(--progress), #FFF var(--progress));
+				width: 300px;
+				font-size: 1.1em;
+			}
+
+			.minify__progress--running {
+				opacity: 1;
+				visibility: visible;
+			}
 		</style>
 	</head>
 	<body>

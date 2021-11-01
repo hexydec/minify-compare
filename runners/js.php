@@ -47,7 +47,7 @@ $urls = [
 ];
 $config = [
 	'title' => 'Javascript Minifiers',
-	'validator' => function (string $js, ?array &$output = null) {
+	'validator' => function (string $js) {
 		$cmd = 'node "'.__DIR__.'/esprima.js"';
 
 		// https://bugs.php.net/bug.php?id=49139
@@ -83,15 +83,15 @@ $config = [
 			// close connection
 			proc_close($proc);
 
+			$output = [];
 			if ($result && ($json = json_decode($result, true)) !== null) {
-				$output = [];
 				foreach ($json AS $item) {
 					$output[] = 'Line: '.$item['lineNumber'].', Index: '.$item['index'].' - '.$item['description'];//.' ('.substr($js, $item['index'] - 100, 200).')';
 				}
 			}
 			// var_dump($output, $result, $error, $status);
 			// exit();
-			return $status['exitcode'] === 0 ? 0 : count($output);
+			return $output;
 		}
 		return null;
 	},
