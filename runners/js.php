@@ -5,14 +5,6 @@ require($dir.'/vendor/autoload.php');
 ini_set('memory_limit', '256M');
 
 $minifiers = [
-	'hexydec/jslite' => function (string $js) use ($dir) {
-		$obj = new \hexydec\jslite\jslite();
-		if ($obj->load($js)) {
-			$obj->minify();
-			return $obj->compile();
-		}
-		return false;
-	},
 	'matthiasmullie/minify' => function (string $js) {
 		$obj = new \MatthiasMullie\Minify\JS($js);
 		return $obj->minify();
@@ -30,6 +22,14 @@ $minifiers = [
 	// 'taufik-nurrohman' => function (string $js) { // crashes
 	// 	return minify_js($js);
 	// },
+	'hexydec/jslite' => function (string $js) use ($dir) {
+		$obj = new \hexydec\jslite\jslite();
+		if ($obj->load($js)) {
+			$obj->minify();
+			return $obj->compile();
+		}
+		return false;
+	},
 ];
 
 $urls = [

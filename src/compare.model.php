@@ -101,7 +101,7 @@ class compareModel {
 				static $last = 0;
 				$now = \microtime(true);
 				if ($last + $this->config['ratelimit'] > $now) {
-					\usleep(($this->config['ratelimit'] - ($now - $last)) * 1000);
+					\usleep(\intval(($this->config['ratelimit'] - ($now - $last)) * 1000));
 				}
 				$last = \microtime(true);
 
@@ -153,7 +153,7 @@ class compareModel {
 					'time' => $finish - $start,
 					'outputerrors' => $this->validate($output, $cache)
 				];
-				$stat['irregular'] = (\count($stat['outputerrors']) > \count($stats['inputerrors'])) || ($stat['output'] < ($stats['input'] * 0.4));
+				$stat['irregular'] = (\count($stat['outputerrors'] ?? []) > \count($stats['inputerrors'] ?? [])) || ($stat['output'] < ($stats['input'] * 0.4));
 				$stat['diff'] = $stat['output'] - $stats['input'];
 				$stat['ratio'] = 100 - ((100 / $stats['input']) * $stat['output']);
 				$stat['diffgzip'] = $stat['outputgzip'] - $stats['inputgzip'];

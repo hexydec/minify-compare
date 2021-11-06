@@ -219,6 +219,7 @@ $config = [
 	'title' => 'HTMLdoc Minification Comparison',
 	'cache' => !isset($_GET['nocache'])
 ];
+// $urls = array_slice($urls, 0, 1);
 $obj = new \hexydec\minify\compare($minifiers, $urls, $config);
 // $url = 'https://kinsta.com/blog/wordpress-site-examples/';
 // $selector = 'h3 > a';

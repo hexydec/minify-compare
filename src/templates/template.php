@@ -113,6 +113,7 @@
 			.minify__popup-code {
 				width: 30px;
 				height: 24px;
+				display: inline-block;
 			}
 
 			.icon-cross {

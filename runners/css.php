@@ -3,14 +3,6 @@ $dir = dirname(__DIR__);
 require($dir.'/vendor/autoload.php');
 
 $minifiers = [
-	'hexydec/cssdoc' => function (string $css) use ($dir) {
-		$obj = new \hexydec\css\cssdoc();
-		if ($obj->load($css)) {
-			$obj->minify();
-			return $obj->compile();
-		}
-		return false;
-	},
 	'matthiasmullie/minify' => function (string $css) {
 		$obj = new \MatthiasMullie\Minify\CSS($css);
 		return $obj->minify();
@@ -45,6 +37,14 @@ $minifiers = [
 	},
 	'taufik-nurrohman' => function (string $css) {
 		return minify_css($css);
+	},
+	'hexydec/cssdoc' => function (string $css) use ($dir) {
+		$obj = new \hexydec\css\cssdoc();
+		if ($obj->load($css)) {
+			$obj->minify();
+			return $obj->compile();
+		}
+		return false;
 	},
 ];
 

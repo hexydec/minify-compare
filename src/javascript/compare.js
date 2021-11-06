@@ -46,9 +46,10 @@ class compare {
 		for (let p = 0; p < len; p++) {
 			promises.push(new Promise(resolve => {
 				this.resolvers.push(() => {
+					run++;
 					this.progress
 						.css("--progress", (percentage * run) + "%")
-						.text("Completed test " + (++run) + " of " + len);
+						.text("Completed test " + run + " of " + len);
 					resolve();
 				});
 			}));
@@ -56,6 +57,7 @@ class compare {
 
 		// when all promises are resolved
 		Promise.allSettled(promises).then(() => {
+			this.progress.removeClass(this.config.addcls + "progress--running");
 			this.totals(this.data);
 		});
 
@@ -133,26 +135,34 @@ class compare {
 							)
 					);
 			return nodes.html();
-		} else if (data.url) {
-			return $("<a>", {
-				href: data.url,
+		} else if (data.code || data.url) {
+			return $("<div>").append($("<a>", {
+				href: data.code || data.url,
 				target: "_blank",
 				title: "View source code",
-				"class": "minify__popup-code icon-tick"
-			}).html();
+				"class": "minify__popup-code icon-code"
+			})).html();
 		}
 	}
 
 	bestAndWorst(values, flip) {
 		const metrics = {
-			best: null,
-			worst: null
+			best: [],
+			worst: []
 		};
 		$.each(metrics, m => {
 			values.forEach((item, i) => {
-				const gt = flip ? m !== "best" : m === "best";
-				if (metrics[m] === null || (gt ? values[metrics[m]] < item : values[metrics[m]] > item)) {
-					metrics[m] = i;
+				if (item !== null) {
+					const gt = m === (flip ? "worst" : "best");
+					if (!metrics[m].length) {
+						metrics[m] = [i];
+					} else if (gt ? values[metrics[m][0]] <= item : values[metrics[m][0]] >= item) {
+						if (values[metrics[m][0]] !== item) {
+							metrics[m] = [i];
+						} else {
+							metrics[m].push(i);
+						}
+					}
 				}
 			});
 		});
@@ -188,9 +198,8 @@ class compare {
 								if (this.config.comparefields.indexOf(key) > -1) {
 									if (data.irregular) {
 										cells.eq(n).addClass(this.config.addcls + "table--failed");
-									} else {
-										values.push(data[key]);
 									}
+									values.push(data.irregular ? null : data[key]);
 								}
 
 								// render the value
@@ -200,7 +209,9 @@ class compare {
 							// write best and worst
 							if (values.length) {
 								$.each(this.bestAndWorst(values, key === "time"), (type, index) => {
-									cells.eq(index).addClass(this.config.addcls + "table--" + type);
+									index.forEach(i => {
+										cells.eq(i).addClass(this.config.addcls + "table--" + type);
+									});
 								});
 							}
 						});
@@ -291,7 +302,9 @@ class compare {
 				// best and worst
 				if (this.config.comparefields.indexOf(key) > -1) {
 					$.each(this.bestAndWorst(totals, key === "time"), (type, index) => {
-						totalcells.eq(index).add(avgcells.eq(index)).addClass(this.config.addcls + "table--" + type);
+						index.forEach(i => {
+							totalcells.eq(i).add(avgcells.eq(index)).addClass(this.config.addcls + "table--" + type);
+						});
 					});
 				}
 			}

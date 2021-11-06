@@ -14,9 +14,9 @@ $minifiers = [
 	'taufik-nurrohman' => function (string $html) {
 		return minify_html($html);
 	},
-	'pfaciana/tiny-html-minifier' => function (string $html) { // incorrect
-		return \Minifier\TinyMinify::html($html);
-	},
+	// 'pfaciana/tiny-html-minifier' => function (string $html) { // incorrect
+	// 	return \Minifier\TinyMinify::html($html);
+	// },
 	'deruli/html-minifier' => function (string $html) { // so slow
 		$obj = new \zz\Html\HTMLMinify($html);
 		return $obj->process();

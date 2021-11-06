@@ -19,7 +19,7 @@ class compare {
 
 		// run a test
 		} elseif (isset($_GET['index'], $urls[$_GET['index']])) {
-			if (($data = $this->model->compare($urls[$_GET['index']], $config['cache'], $_GET['index'])) !== false) {
+			if (($data = $this->model->compare($urls[$_GET['index']], $config['cache'], (int) $_GET['index'])) !== false) {
 				$json = \json_encode($data);
 				\header('Content-type: application/json');
 				\header('Content-length: '.\strlen($json));
