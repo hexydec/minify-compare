@@ -48,7 +48,7 @@ $urls = [
 	'https://www.qualtrics.com',
 	'http://dyn.com/',
 	'https://www.quantcast.com/',
-	'https://www.nginx.com/',
+	// 'https://www.nginx.com/',
 	'http://www.tucows.com/',
 	// 'https://www.sonymusic.com/',
 	'https://www.nytco.com/',
@@ -65,7 +65,7 @@ $urls = [
 	'https://adespresso.com/',
 	'http://www.toyota.com.br/',
 	// 'https://www.loggly.com/',
-	'http://www.wolverineworldwide.com/',
+	// 'http://www.wolverineworldwide.com/',
 	'https://www.sparkpost.com/',
 	'https://foliovision.com/',
 	'http://www.expressjet.com/',
@@ -148,7 +148,7 @@ $urls = [
 	'https://blog.cpanel.com/',
 	'https://blogs.wsj.com/law/',
 	// 'https://www.tripadvisor.com/blog/',
-	'https://pulse.target.com/',
+	// 'https://pulse.target.com/',
 	// 'http://blog.staples.ca/',
 	'http://blogs.blackberry.com/',
 	'https://www.rackspace.com/blog',
@@ -188,7 +188,7 @@ $config = [
 		if (strlen($html) < 500000) {
 
 			// list of validators we can use
-			$validators = ['https://html5.validator.nu/?out=json', 'https://validator.nu/?out=json', 'https://validator.w3.org/nu/?out=json'];
+			$validators = ['https://html5.validator.nu/?out=json&type=error', 'https://validator.nu/?out=json&type=error', 'https://validator.w3.org/nu/?out=json&type=error'];
 			static $index = 0;
 
 			// create context
