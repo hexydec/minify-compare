@@ -19,9 +19,9 @@ $minifiers = [
 	'wikimedia/minify' => function ($js) {
 		return \Wikimedia\Minify\JavaScriptMinifier::minify($js);
 	},
-	// 'taufik-nurrohman' => function (string $js) { // crashes
-	// 	return minify_js($js);
-	// },
+	'taufik-nurrohman' => function (string $js) { // crashes
+		return minify_js($js);
+	},
 	'hexydec/jslite' => function (string $js) use ($dir) {
 		$obj = new \hexydec\jslite\jslite();
 		if ($obj->load($js)) {
