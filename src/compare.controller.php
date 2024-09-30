@@ -32,16 +32,17 @@ class compare {
 		}
 	}
 
-	public function drawPage() {
+	public function drawPage() : ?string {
 		if ($this->model->action === 'code') {
 			if (($code = $this->view->drawMinifierOutput($this->model->minifier, $this->model->url)) === null) {
-				trigger_error('The minifier didn\'t output any code', E_USER_WARNING);
+				\trigger_error('The minifier didn\'t output any code', E_USER_WARNING);
 			} else {
-				header('Content-type: text/plain');
+				\header('Content-type: text/plain');
 				exit($code);
 			}
 		} else {
 			return $this->view->drawCompare($this->model->urls, $this->model->config['cache']);
 		}
+		return null;
 	}
 }

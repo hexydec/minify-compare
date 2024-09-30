@@ -4,17 +4,18 @@ namespace hexydec\minify;
 
 class compareModel {
 
-	public $minifiers = [];
-	public $urls = [];
-	public $config = [
+	public array $minifiers = [];
+	public array $urls = [];
+	public array $config = [
 		'title' => null,
 		'cache' => true,
 		'ratelimit' => 2000,
 		'validator' => null
 	];
-	public $action = null;
-	public $minifier = null;
-	public $errors = [];
+	public ?string $action = null;
+	public ?string $minifier = null;
+	public ?string $url = null;
+	public array $errors = [];
 
 	public function __construct(array $minifiers, array $urls, array $config) {
 		$this->minifiers = $minifiers;
@@ -22,7 +23,7 @@ class compareModel {
 		$this->config = array_merge($this->config, $config);
 	}
 
-	public function fetch(string $url, bool $cache = true) {
+	public function fetch(string $url, bool $cache = true) : string|false {
 		$file = $cache ? \dirname(__DIR__).'/cache/'.\trim(\preg_replace('/[^0-9a-z]++/i', '-', $url), '-').'.cache' : null;
 		if ($file && \file_exists($file)) {
 			$url = $file;
@@ -30,9 +31,19 @@ class compareModel {
 		$context = \stream_context_create([
 			'http' => [
 				'headers' => [
-					'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+					'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/113.0',
+					'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
 					'Accept-Language: en-GB,en;q=0.5',
-					'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0'
+					// 'Accept-Encoding: gzip, deflate, br',
+					'Connection: keep-alive',
+					'Upgrade-Insecure-Requests: 1',
+					'Sec-Fetch-Dest: document',
+					'Sec-Fetch-Mode: navigate',
+					'Sec-Fetch-Site: cross-site',
+					'DNT: 1',
+					'Sec-GPC: 1',
+					'Pragma: no-cache',
+					'Cache-Control: no-cache'
 				],
 				'timeout' => 10
 			]
@@ -48,7 +59,7 @@ class compareModel {
 		return $html ? $html : false;
 	}
 
-	public function minify(string $minifier, string $input, string $url) {
+	public function minify(string $minifier, string $input, string $url) : string {
 		\set_time_limit(30);
 
 		// Setup the environment
@@ -119,7 +130,7 @@ class compareModel {
 		return null;
 	}
 
-	public function compare(string $url, bool $cache = true, int $index = null) {
+	public function compare(string $url, bool $cache = true, int $index = null) : array|false {
 
 		// fetch the URL
 		if (($input = $this->fetch($url, $cache)) !== false) {

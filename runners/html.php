@@ -1,23 +1,21 @@
 <?php
-$dir = dirname(__DIR__);
-require($dir.'/vendor/autoload.php');
-ini_set('memory_limit', '256M');
+\ini_set('memory_limit', '256M');
+\ini_set('display_errors', true);
+$dir = \dirname(__DIR__);
+require $dir.'/vendor/autoload.php';
 
 $minifiers = [
-	'voku/html-min' => function (string $html) {
+	'voku/html-min' => function (string $html) : string {
 		$htmlMin = new \voku\helper\HtmlMin();
 		return $htmlMin->minify($html);
 	},
-	'mrclay/minify' => function (string $html) {
+	'mrclay/minify' => function (string $html) : string {
 		return Minify_HTML::minify($html);
 	},
-	'taufik-nurrohman' => function (string $html) {
+	'taufik-nurrohman' => function (string $html) : string {
 		return minify_html($html);
 	},
-	// 'pfaciana/tiny-html-minifier' => function (string $html) { // incorrect
-	// 	return \Minifier\TinyMinify::html($html);
-	// },
-	'deruli/html-minifier' => function (string $html) { // so slow
+	'deruli/html-minifier' => function (string $html) : string { // so slow
 		$obj = new \zz\Html\HTMLMinify($html);
 		return $obj->process();
 	},
@@ -37,7 +35,7 @@ $minifiers = [
 			return $obj->html();
 		}
 		return false;
-	},
+	}
 ];
 
 $urls = [
@@ -185,14 +183,14 @@ $urls = [
 $config = [
 	'title' => 'HTML Minifiers',
 	'validator' => function (string $html) {
-		if (strlen($html) < 500000) {
+		if (\strlen($html) < 500000) {
 
 			// list of validators we can use
 			$validators = ['https://html5.validator.nu/?out=json&type=error', 'https://validator.nu/?out=json&type=error', 'https://validator.w3.org/nu/?out=json&type=error'];
 			static $index = 0;
 
 			// create context
-			$context = stream_context_create([
+			$context = \stream_context_create([
 				'http' => [
 					'header' => [
 						'Content-type: text/html; charset=utf-8'
@@ -203,7 +201,7 @@ $config = [
 					'timeout' => 10
 				]
 			]);
-			if (($json = file_get_contents($validators[$index], false, $context)) !== false && ($data = json_decode($json, true)) !== null) {
+			if (($json = \file_get_contents($validators[$index], false, $context)) !== false && ($data = \json_decode($json, true)) !== null) {
 
 				// compile errors
 				$output = [];

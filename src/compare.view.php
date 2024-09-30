@@ -10,7 +10,7 @@ class compareView {
 		$this->model = $model;
 	}
 
-	public function drawCompare(array $urls, bool $cache = true) : string {
+	public function drawCompare(array $urls) : string {
 
 		// render the table
 		$table = $this->compile([
@@ -44,13 +44,13 @@ class compareView {
 		foreach ($content AS ${'key-66f6181bcb4cff4cd38fbc804a036db6'} => ${'value-66f6181bcb4cff4cd38fbc804a036db6'}) {
 			$${'key-66f6181bcb4cff4cd38fbc804a036db6'} = ${'value-66f6181bcb4cff4cd38fbc804a036db6'}; // manual extract to allow for vars with dashes
 		}
-		if (is_array($content)) {
+		if (\is_array($content)) {
 			unset($content); // may have been overwritten
 		}
-		ob_start();
-		require(${'template-66f6181bcb4cff4cd38fbc804a036db6'});
-		$html = ob_get_contents();
-		ob_end_clean();
+		\ob_start();
+		require ${'template-66f6181bcb4cff4cd38fbc804a036db6'};
+		$html = \ob_get_contents();
+		\ob_end_clean();
 		return $html;
 	}
 }

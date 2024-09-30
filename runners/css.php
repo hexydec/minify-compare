@@ -1,6 +1,6 @@
 <?php
-$dir = dirname(__DIR__);
-require($dir.'/vendor/autoload.php');
+$dir = \dirname(__DIR__);
+require $dir.'/vendor/autoload.php';
 
 $minifiers = [
 	'matthiasmullie/minify' => function (string $css) {
@@ -65,14 +65,14 @@ $urls = [
 $config = [
 	'title' => 'CSS Minifiers',
 	'validator' => function (string $css) {
-		if (strlen($css) < 500000) {
+		if (\strlen($css) < 500000) {
 
 			// list of validators we can use
 			$validators = ['https://html5.validator.nu/?out=json', 'https://validator.nu/?out=json', 'https://validator.w3.org/nu/?out=json'];
 			static $index = 0;
 
 			// create context
-			$context = stream_context_create([
+			$context = \stream_context_create([
 				'http' => [
 					'header' => [
 						'Content-type: text/html; charset=utf-8'
@@ -83,7 +83,7 @@ $config = [
 					'timeout' => 10
 				]
 			]);
-			if (($json = file_get_contents($validators[$index], false, $context)) !== false && ($data = json_decode($json, true)) !== null) {
+			if (($json = \file_get_contents($validators[$index], false, $context)) !== false && ($data = \json_decode($json, true)) !== null) {
 
 				// compile errors
 				$output = [];
